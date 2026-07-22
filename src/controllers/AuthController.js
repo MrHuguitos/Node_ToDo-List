@@ -1,6 +1,7 @@
 import User from "../models/UsersModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
 
 export default class AuthController {
     static async register(req, res) {
@@ -44,5 +45,43 @@ export default class AuthController {
             console.log(error);
             res.status(500).json({ message: "Internal server error" });
         };
+    };
+
+    static async googleLogin(req, res) {
+        try {
+            const { token } = req.body;
+            
+            if (!token) return res.status(400).json({ message: "Token is required" });
+
+            const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+            const ticket = await client.verifyIdToken({
+                idToken: token,
+                audience: process.env.GOOGLE_CLIENT_ID,
+            });
+
+            const payload = ticket.getPayload();
+            const { email, name } = payload;
+
+            let user = await User.findOne({ email });
+
+            if (!user) {
+                const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+                const hashedPassword = await bcrypt.hash(randomPassword, 10);
+                
+                user = new User({
+                    name,
+                    email,
+                    password: hashedPassword
+                });
+                await user.save();
+            }
+
+            const jwtToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+            res.status(200).json({ token: jwtToken });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: "Internal server error during Google Login" });
+        }
     };
 }
