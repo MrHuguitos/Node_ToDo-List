@@ -40,7 +40,7 @@ export default class AuthController {
 
             const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-            res.status(200).json({ token });
+            res.status(200).json({ token, name: user.name });
         } catch (error) {
             console.log(error);
             res.status(500).json({ message: "Internal server error" });
@@ -78,7 +78,7 @@ export default class AuthController {
 
             const jwtToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-            res.status(200).json({ token: jwtToken });
+            res.status(200).json({ token: jwtToken, name: user.name });
         } catch (error) {
             console.log(error);
             res.status(500).json({ message: "Internal server error during Google Login" });
