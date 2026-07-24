@@ -42,8 +42,8 @@ export default class AuthController {
 
             res.cookie('token', token, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
+                secure: true,
+                sameSite: 'none',
                 maxAge: 3600000
             });
             res.status(200).json({ name: user.name });
@@ -87,8 +87,8 @@ export default class AuthController {
 
             res.cookie('token', jwtToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
+                secure: true,
+                sameSite: 'none',
                 maxAge: 3600000
             });
 
@@ -103,8 +103,8 @@ export default class AuthController {
         try {
             res.clearCookie('token', {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict'
+                secure: true,
+                sameSite: 'none'
             });
             res.status(200).json({ message: "User logged out successfully" });
         } catch (error) {
