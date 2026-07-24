@@ -30,7 +30,7 @@ export default class TasksController {
     static async updateTask(req, res) {
         try {
             const id = req.params.id;
-            const updatedData = req.body;
+            const { userId, ...updatedData } = req.body;
             const updatedTask = await Task.findOneAndUpdate(
                 { _id: id, userId: req.userId }, 
                 { $set: updatedData },

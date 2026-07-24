@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import connectDB from "./src/config/dbconfig.js";
 import AuthRoutes from "./src/routes/AuthRoutes.js";
 import TasksRoutes from "./src/routes/TasksRoutes.js";
@@ -11,8 +12,10 @@ connectDB();
 const app = express();
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL || '*'
+    credentials: true,
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173'
 }));
+app.use(cookieParser());
 app.use(express.json());
 
 app.get('/ping', (req, res) => {

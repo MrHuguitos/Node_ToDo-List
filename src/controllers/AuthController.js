@@ -40,7 +40,13 @@ export default class AuthController {
 
             const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-            res.status(200).json({ token, name: user.name });
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 3600000
+            });
+            res.status(200).json({ name: user.name });
         } catch (error) {
             console.log(error);
             res.status(500).json({ message: "Internal server error" });
@@ -73,15 +79,37 @@ export default class AuthController {
                     email,
                     password: hashedPassword
                 });
+                
                 await user.save();
             }
 
             const jwtToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-            res.status(200).json({ token: jwtToken, name: user.name });
+            res.cookie('token', jwtToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 3600000
+            });
+
+            res.status(200).json({ name: user.name });
         } catch (error) {
             console.log(error);
             res.status(500).json({ message: "Internal server error during Google Login" });
+        }
+    };
+
+    static async logout(req, res) {
+        try {
+            res.clearCookie('token', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict'
+            });
+            res.status(200).json({ message: "User logged out successfully" });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: "Internal server error during Logout" });
         }
     };
 }
