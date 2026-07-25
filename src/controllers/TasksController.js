@@ -20,7 +20,7 @@ export default class TasksController {
             };
             const task = await Task.create(newTask);
             
-            res.status(201).json({ message: "Task created successfully", task });
+            res.status(201).json({ task });
         } catch (error) {
             console.log(error);
             res.status(500).json({ message: "Internal server error" });
@@ -39,7 +39,7 @@ export default class TasksController {
 
             if (!updatedTask) return res.status(404).json({ message: "Task not found or unauthorized" });
             
-            res.status(200).json({ message: "Task updated successfully", updatedTask });
+            res.status(200).json({ updatedTask });
         } catch (error) {
             console.log(error);
             res.status(500).json({ message: "Internal server error" });
@@ -53,7 +53,7 @@ export default class TasksController {
 
             if (!deletedTask) return res.status(404).json({ message: "Task not found or unauthorized" });
 
-            res.status(200).json({ message: "Task deleted successfully", deletedTask });
+            res.status(200).json({ deletedTask });
         } catch (error) {
             console.log(error);
             res.status(500).json({ message: "Internal server error" });

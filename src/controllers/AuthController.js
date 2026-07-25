@@ -9,7 +9,7 @@ export default class AuthController {
             const { name, email, password } = req.body;
             const user = await User.findOne({ email });
 
-            if (user) return res.status(400).json({ message: "User already exists" });
+            if (user) return res.status(400).json({ message: "Você já está cadastrado. Faça login." });
 
             const hashedPassword = await bcrypt.hash(password, 10);
             const newUser = new User({
@@ -20,7 +20,15 @@ export default class AuthController {
 
             await newUser.save();
 
-            res.status(201).json({ message: "User created successfully" });
+            const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none',
+                maxAge: 3600000
+            });
+            res.status(201).json({ name: newUser.name });
         } catch (error) {
             console.log(error);
             res.status(500).json({ message: "Internal server error" });
@@ -32,11 +40,11 @@ export default class AuthController {
             const { email, password } = req.body;
             const user = await User.findOne({ email }).select("+password");
 
-            if (!user) return res.status(404).json({ message: "User not found" });
+            if (!user) return res.status(404).json({ message: "Usuário ou senha inválidos. Tente novamente." });
 
             const isPasswordValid = await bcrypt.compare(password, user.password);
             
-            if (!isPasswordValid) return res.status(401).json({ message: "Invalid password" });
+            if (!isPasswordValid) return res.status(401).json({ message: "Usuário ou senha inválidos. Tente novamente." });
 
             const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
